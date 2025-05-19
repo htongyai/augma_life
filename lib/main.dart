@@ -1268,8 +1268,8 @@ class _EmotionTrackingPageState extends State<EmotionTrackingPage>
                     ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 12.0,
+                        horizontal: 14.0,
+                        vertical: 10.0,
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -1295,7 +1295,7 @@ class _EmotionTrackingPageState extends State<EmotionTrackingPage>
                                     ),
                                   ),
                                   Text(
-                                    'Your Wellness Avatar',
+                                    'Augma Life Avatar',
                                     style: GoogleFonts.orbitron(
                                       textStyle: const TextStyle(
                                         fontSize: 16,
@@ -1380,7 +1380,7 @@ class _EmotionTrackingPageState extends State<EmotionTrackingPage>
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            "Magna feels ${_avatarLabels[_selectedEnergyLevel].toLowerCase()} today",
+                            "Avatar energy: ${_avatarLabels[_selectedEnergyLevel].toLowerCase()}",
                             style: GoogleFonts.nunito(
                               textStyle: const TextStyle(
                                 fontSize: 20,
@@ -1416,9 +1416,9 @@ class _EmotionTrackingPageState extends State<EmotionTrackingPage>
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    // BUN-E label (Orbitron)
+                                    // Insight label (Orbitron)
                                     Text(
-                                      "Magna:",
+                                      "Insight:",
                                       style: GoogleFonts.orbitron(
                                         textStyle: const TextStyle(
                                           fontSize: 14,
