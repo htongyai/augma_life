@@ -67,7 +67,7 @@ Future<void> scheduleDailyNotifications() async {
     },
     {
       'id': 1,
-      'hour': 12,
+      'hour': 9,
       'minute': 0,
       'title': 'Set your intentions',
       'body': 'Have you set your intentions for the day?',
@@ -232,6 +232,7 @@ class _MainNavPageState extends State<MainNavPage> {
   late ScrollController _scrollController;
   bool _showNavBar = true;
   double _lastOffset = 0;
+  bool _immersiveMode = false;
 
   @override
   void initState() {
@@ -239,6 +240,14 @@ class _MainNavPageState extends State<MainNavPage> {
     _fetchAndStoreUserInfo();
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
+    _loadImmersiveMode();
+  }
+
+  Future<void> _loadImmersiveMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _immersiveMode = prefs.getBool('immersiveMode') ?? false;
+    });
   }
 
   @override
@@ -272,16 +281,21 @@ class _MainNavPageState extends State<MainNavPage> {
   }
 
   Widget _buildPage() {
-    // Pass the scroll controller to the current page if it accepts it
     switch (_selectedIndex) {
       case 0:
-        return EmotionTrackingPage(scrollController: _scrollController);
+        return EmotionTrackingPage(
+          scrollController: _scrollController,
+          immersiveMode: _immersiveMode,
+        );
       case 1:
         return StatsPage(scrollController: _scrollController);
       case 2:
         return DailyGoalPage(scrollController: _scrollController);
       default:
-        return EmotionTrackingPage(scrollController: _scrollController);
+        return EmotionTrackingPage(
+          scrollController: _scrollController,
+          immersiveMode: _immersiveMode,
+        );
     }
   }
 
@@ -294,7 +308,7 @@ class _MainNavPageState extends State<MainNavPage> {
           Positioned.fill(
             child: Column(
               children: [
-                const SizedBox(height: 24), // Top padding
+                // const SizedBox(height: 24), // Top padding
                 Expanded(child: _buildPage()),
               ],
             ),
@@ -340,7 +354,7 @@ class _MainNavPageState extends State<MainNavPage> {
                                     _selectedIndex == 0
                                         ? Colors.red[900]
                                         : Colors.grey,
-                                size: 32,
+                                size: 28,
                               ),
                               const SizedBox(height: 4),
                               Text(
@@ -371,7 +385,7 @@ class _MainNavPageState extends State<MainNavPage> {
                                     _selectedIndex == 1
                                         ? Colors.red[900]
                                         : Colors.grey,
-                                size: 32,
+                                size: 28,
                               ),
                               const SizedBox(height: 4),
                               Text(
@@ -402,7 +416,7 @@ class _MainNavPageState extends State<MainNavPage> {
                                     _selectedIndex == 2
                                         ? Colors.red[900]
                                         : Colors.grey,
-                                size: 32,
+                                size: 28,
                               ),
                               const SizedBox(height: 4),
                               Text(
@@ -1479,7 +1493,12 @@ class _StatsPageState extends State<StatsPage> {
 
 class EmotionTrackingPage extends StatefulWidget {
   final ScrollController? scrollController;
-  const EmotionTrackingPage({super.key, this.scrollController});
+  final bool immersiveMode;
+  const EmotionTrackingPage({
+    super.key,
+    this.scrollController,
+    this.immersiveMode = false,
+  });
 
   @override
   State<EmotionTrackingPage> createState() => _EmotionTrackingPageState();
@@ -2540,145 +2559,174 @@ class _EmotionTrackingPageState extends State<EmotionTrackingPage>
                   ),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.only(
-                    left: 8.0,
-                    right: 8.0,
-                    top: 10.0,
-                    bottom: 100.0, // Extra padding for the floating nav bar
-                  ),
+                  padding:
+                      widget.immersiveMode
+                          ? EdgeInsets.zero
+                          : const EdgeInsets.only(
+                            left: 8.0,
+                            right: 8.0,
+                            top: 10.0,
+                            bottom:
+                                100.0, // Extra padding for the floating nav bar
+                          ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const SizedBox(height: 32), // Increased top padding
-                      // Header with greeting and date
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // App name in header (Orbitron)
-                                FutureBuilder<String>(
-                                  future: SharedPreferences.getInstance().then((
-                                    prefs,
-                                  ) {
-                                    final userName = prefs.getString(
-                                      'userName',
-                                    );
-                                    final avatarName =
-                                        prefs.getString('avatarName') ??
-                                        'Friend';
-                                    return userName ?? avatarName;
-                                  }),
-                                  builder: (context, snapshot) {
-                                    final fullName = snapshot.data ?? 'Friend';
-                                    final firstName = fullName.split(' ').first;
-                                    return Text(
-                                      'Hi, $firstName',
-                                      style: GoogleFonts.orbitron(
-                                        textStyle: const TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
+                      if (!widget.immersiveMode) ...[
+                        const SizedBox(height: 32),
+                        // Header with greeting and date
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // App name in header (Orbitron)
+                                  FutureBuilder<String>(
+                                    future: SharedPreferences.getInstance()
+                                        .then((prefs) {
+                                          final userName = prefs.getString(
+                                            'userName',
+                                          );
+                                          final avatarName =
+                                              prefs.getString('avatarName') ??
+                                              'Friend';
+                                          return userName ?? avatarName;
+                                        }),
+                                    builder: (context, snapshot) {
+                                      final fullName =
+                                          snapshot.data ?? 'Friend';
+                                      final firstName =
+                                          fullName.split(' ').first;
+                                      return Text(
+                                        'Hi, $firstName',
+                                        style: GoogleFonts.orbitron(
+                                          textStyle: const TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
+                                      );
+                                    },
+                                  ),
+                                  const SizedBox(height: 2),
+                                  // Welcome message (Nunito)
+                                  Text(
+                                    'Welcome to Augma Life',
+                                    style: GoogleFonts.orbitron(
+                                      textStyle: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.red[900],
                                       ),
-                                    );
-                                  },
-                                ),
-                                const SizedBox(height: 2),
-                                // Welcome message (Nunito)
-                                Text(
-                                  'Welcome to Augma Life',
-                                  style: GoogleFonts.orbitron(
-                                    textStyle: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.red[900],
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            // Settings button
-                            Row(
-                              children: [
-                                FloatingActionButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      PageRouteBuilder(
-                                        pageBuilder:
-                                            (
-                                              context,
-                                              animation,
-                                              secondaryAnimation,
-                                            ) => const SettingsPage(),
-                                        transitionsBuilder: (
-                                          context,
-                                          animation,
-                                          secondaryAnimation,
-                                          child,
-                                        ) {
-                                          const begin = Offset(1.0, 0.0);
-                                          const end = Offset.zero;
-                                          const curve = Curves.easeInOutQuart;
-                                          var tween = Tween(
-                                            begin: begin,
-                                            end: end,
-                                          ).chain(CurveTween(curve: curve));
-                                          var offsetAnimation = animation.drive(
-                                            tween,
-                                          );
-                                          return SlideTransition(
-                                            position: offsetAnimation,
-                                            child: child,
-                                          );
-                                        },
-                                        transitionDuration: const Duration(
-                                          milliseconds: 500,
+                                ],
+                              ),
+                              // Settings button
+                              Row(
+                                children: [
+                                  FloatingActionButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        PageRouteBuilder(
+                                          pageBuilder:
+                                              (
+                                                context,
+                                                animation,
+                                                secondaryAnimation,
+                                              ) => const SettingsPage(),
+                                          transitionsBuilder: (
+                                            context,
+                                            animation,
+                                            secondaryAnimation,
+                                            child,
+                                          ) {
+                                            const begin = Offset(1.0, 0.0);
+                                            const end = Offset.zero;
+                                            const curve = Curves.easeInOutQuart;
+                                            var tween = Tween(
+                                              begin: begin,
+                                              end: end,
+                                            ).chain(CurveTween(curve: curve));
+                                            var offsetAnimation = animation
+                                                .drive(tween);
+                                            return SlideTransition(
+                                              position: offsetAnimation,
+                                              child: child,
+                                            );
+                                          },
+                                          transitionDuration: const Duration(
+                                            milliseconds: 500,
+                                          ),
                                         ),
-                                      ),
-                                    );
-                                  },
-                                  backgroundColor: Colors.red[900],
-                                  mini: true,
-                                  elevation: 2,
-                                  heroTag: 'settingsBtn',
-                                  child: const Icon(
-                                    Icons.settings,
-                                    color: Colors.white,
+                                      );
+                                    },
+                                    backgroundColor: Colors.red[900],
+                                    mini: true,
+                                    elevation: 2,
+                                    heroTag: 'settingsBtn',
+                                    child: const Icon(
+                                      Icons.settings,
+                                      color: Colors.white,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ],
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-
-                      const SizedBox(height: 10),
-
+                        const SizedBox(height: 10),
+                      ],
                       // Avatar section with time-of-day gradient
                       Card(
+                        margin: widget.immersiveMode ? EdgeInsets.zero : null,
+                        shape:
+                            widget.immersiveMode
+                                ? null
+                                : RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
                         child: Container(
+                          height:
+                              widget.immersiveMode
+                                  ? MediaQuery.of(context).size.height * 0.725
+                                  : null,
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                               colors: gradientColors,
                             ),
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius:
+                                widget.immersiveMode
+                                    ? null
+                                    : BorderRadius.circular(20),
                           ),
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14.0,
-                              vertical: 10.0,
-                            ),
+                            padding:
+                                widget.immersiveMode
+                                    ? const EdgeInsets.symmetric(
+                                      horizontal: 16.0,
+                                    )
+                                    : const EdgeInsets.symmetric(
+                                      horizontal: 14.0,
+                                      vertical: 10.0,
+                                    ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment:
+                                  widget.immersiveMode
+                                      ? MainAxisAlignment.spaceEvenly
+                                      : MainAxisAlignment.start,
                               children: [
+                                if (widget.immersiveMode)
+                                  const SizedBox(height: 40),
                                 // Date (Nunito)
                                 const SizedBox(height: 1),
                                 Row(
@@ -2711,8 +2759,12 @@ class _EmotionTrackingPageState extends State<EmotionTrackingPage>
                                                         'Friend',
                                                   ),
                                           builder: (context, snapshot) {
+                                            final userName =
+                                                snapshot.data ?? 'Friend';
                                             return Text(
-                                              snapshot.data ?? 'Friend',
+                                              widget.immersiveMode
+                                                  ? 'Hello, $userName'
+                                                  : userName,
                                               style: GoogleFonts.orbitron(
                                                 textStyle: const TextStyle(
                                                   fontSize: 16,
@@ -2723,12 +2775,23 @@ class _EmotionTrackingPageState extends State<EmotionTrackingPage>
                                             );
                                           },
                                         ),
+                                        if (widget.immersiveMode)
+                                          Text(
+                                            'Welcome to Augma Aura',
+                                            style: GoogleFonts.nunito(
+                                              textStyle: TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.red[900],
+                                              ),
+                                            ),
+                                          ),
                                       ],
                                     ),
+
                                     _getCelestialIcon(),
                                   ],
                                 ),
-                                const SizedBox(height: 8),
+                                //const SizedBox(height: 2),
 
                                 // Energy Level Indicator
                                 Row(
@@ -2814,53 +2877,64 @@ class _EmotionTrackingPageState extends State<EmotionTrackingPage>
                                   ),
                                 ),
                                 const SizedBox(height: 16),
-                                FutureBuilder<String>(
-                                  future: FirebaseService()
-                                      .getUserProfile(
-                                        FirebaseAuth.instance.currentUser!.uid,
-                                      )
-                                      .then(
-                                        (profile) =>
-                                            profile?['avatarName'] ?? 'Friend',
-                                      ),
-                                  builder: (context, snapshot) {
-                                    final avatarName =
-                                        snapshot.data ?? 'Friend';
-                                    return Text(
-                                      "$avatarName Energy: ${_avatarLabels[_selectedEnergyLevel].toLowerCase()}",
+                                Column(
+                                  children: [
+                                    FutureBuilder<String>(
+                                      future: FirebaseService()
+                                          .getUserProfile(
+                                            FirebaseAuth
+                                                .instance
+                                                .currentUser!
+                                                .uid,
+                                          )
+                                          .then(
+                                            (profile) =>
+                                                profile?['avatarName'] ??
+                                                'Friend',
+                                          ),
+                                      builder: (context, snapshot) {
+                                        final avatarName =
+                                            snapshot.data ?? 'Friend';
+                                        return Text(
+                                          "$avatarName Energy: ${_avatarLabels[_selectedEnergyLevel].toLowerCase()}",
+                                          style: GoogleFonts.nunito(
+                                            textStyle: const TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                    widget.immersiveMode
+                                        ? const SizedBox(height: 0)
+                                        : const SizedBox(height: 6),
+                                    // Based on metrics (Nunito)
+                                    // Text(
+                                    //   "Avatar energy: ${_avatarLabels[_selectedEnergyLevel].toLowerCase()}",
+                                    //   style: GoogleFonts.nunito(
+                                    //     textStyle: const TextStyle(
+                                    //       fontSize: 20,
+                                    //       fontWeight: FontWeight.bold,
+                                    //       color: Colors.white,
+                                    //     ),
+                                    //   ),
+                                    // ),
+                                    const SizedBox(height: 2),
+                                    // Based on metrics (Nunito)
+                                    Text(
+                                      "Reflection of your energy",
                                       style: GoogleFonts.nunito(
                                         textStyle: const TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
+                                          fontSize: 14,
+                                          color: Colors.white70,
                                         ),
                                       ),
-                                    );
-                                  },
-                                ),
-                                const SizedBox(height: 6),
-                                // Based on metrics (Nunito)
-                                // Text(
-                                //   "Avatar energy: ${_avatarLabels[_selectedEnergyLevel].toLowerCase()}",
-                                //   style: GoogleFonts.nunito(
-                                //     textStyle: const TextStyle(
-                                //       fontSize: 20,
-                                //       fontWeight: FontWeight.bold,
-                                //       color: Colors.white,
-                                //     ),
-                                //   ),
-                                // ),
-                                const SizedBox(height: 2),
-                                // Based on metrics (Nunito)
-                                Text(
-                                  "Reflection of your energy",
-                                  style: GoogleFonts.nunito(
-                                    textStyle: const TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.white70,
                                     ),
-                                  ),
+                                  ],
                                 ),
+
                                 const SizedBox(height: 16),
                                 // Mantra box moved inside the avatar card
                                 Container(
@@ -2946,7 +3020,9 @@ class _EmotionTrackingPageState extends State<EmotionTrackingPage>
                       // Emotion selection section
                       Card(
                         child: Padding(
-                          padding: const EdgeInsets.all(16.0),
+                          padding: EdgeInsets.all(
+                            widget.immersiveMode ? 16 : 16.0,
+                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -3938,6 +4014,46 @@ class _EmotionTrackingPageState extends State<EmotionTrackingPage>
                           ),
                         ),
                       ),
+                      const SizedBox(height: 16),
+                      FloatingActionButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            PageRouteBuilder(
+                              pageBuilder:
+                                  (context, animation, secondaryAnimation) =>
+                                      const SettingsPage(),
+                              transitionsBuilder: (
+                                context,
+                                animation,
+                                secondaryAnimation,
+                                child,
+                              ) {
+                                const begin = Offset(1.0, 0.0);
+                                const end = Offset.zero;
+                                const curve = Curves.easeInOutQuart;
+                                var tween = Tween(
+                                  begin: begin,
+                                  end: end,
+                                ).chain(CurveTween(curve: curve));
+                                var offsetAnimation = animation.drive(tween);
+                                return SlideTransition(
+                                  position: offsetAnimation,
+                                  child: child,
+                                );
+                              },
+                              transitionDuration: const Duration(
+                                milliseconds: 500,
+                              ),
+                            ),
+                          );
+                        },
+                        backgroundColor: Colors.red[900],
+                        mini: true,
+                        elevation: 2,
+                        heroTag: 'settingsBtn',
+                        child: const Icon(Icons.settings, color: Colors.white),
+                      ),
                     ],
                   ),
                 ),
@@ -4062,6 +4178,7 @@ class _SettingsPageState extends State<SettingsPage>
   bool _notificationsEnabled = true;
   bool _healthSyncEnabled = true;
   bool _isMetric = true;
+  bool _immersiveMode = false;
   late SharedPreferences _prefs;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -4087,6 +4204,7 @@ class _SettingsPageState extends State<SettingsPage>
       _notificationsEnabled = _prefs.getBool('notifications') ?? true;
       _healthSyncEnabled = _prefs.getBool('healthSync') ?? true;
       _isMetric = _prefs.getBool('isMetric') ?? true;
+      _immersiveMode = _prefs.getBool('immersiveMode') ?? false;
     });
   }
 
@@ -4169,6 +4287,11 @@ class _SettingsPageState extends State<SettingsPage>
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  Future<void> _setImmersiveMode(bool value) async {
+    setState(() => _immersiveMode = value);
+    await _prefs.setBool('immersiveMode', value);
   }
 
   @override
@@ -4310,6 +4433,14 @@ class _SettingsPageState extends State<SettingsPage>
                                   (value) => setState(
                                     () => _notificationsEnabled = value,
                                   ),
+                            ),
+                            SettingsSwitch(
+                              title: 'Immersive Mode',
+                              subtitle:
+                                  'Hide greeting and settings icon, expand avatar',
+                              icon: Icons.fullscreen,
+                              value: _immersiveMode,
+                              onChanged: (value) => _setImmersiveMode(value),
                             ),
                           ],
                         ),
