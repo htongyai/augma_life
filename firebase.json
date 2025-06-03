@@ -1,0 +1,1 @@
+{"flutter":{"platforms":{"ios":{"default":{"projectId":"augma-life","appId":"1:435062074733:ios:6d3e3ed2e879227324fe64","uploadDebugSymbols":false,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"augma-life","configurations":{"ios":"1:435062074733:ios:6d3e3ed2e879227324fe64"}}}}}}
