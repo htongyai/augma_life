@@ -126,8 +126,8 @@ Future<void> scheduleDailyNotifications() async {
 }
 
 tz.TZDateTime _nextInstanceOfTime(int hour, int minute) {
-  final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-  tz.TZDateTime scheduledDate = tz.TZDateTime(
+  final now = tz.TZDateTime.now(tz.local);
+  var scheduledDate = tz.TZDateTime(
     tz.local,
     now.year,
     now.month,
@@ -135,10 +135,171 @@ tz.TZDateTime _nextInstanceOfTime(int hour, int minute) {
     hour,
     minute,
   );
+
+  // If the time has already passed today, schedule for tomorrow
   if (scheduledDate.isBefore(now)) {
     scheduledDate = scheduledDate.add(const Duration(days: 1));
   }
+
   return scheduledDate;
+}
+
+Future<void> _scheduleNotifications() async {
+  await flutterLocalNotificationsPlugin.zonedSchedule(
+    0,
+    'Start your day!',
+    'Time to check in with your emotions',
+    _nextInstanceOfTime(6, 0),
+    NotificationDetails(
+      android: AndroidNotificationDetails(
+        'daily_notifications',
+        'Daily Notifications',
+        channelDescription: 'Daily notification channel',
+        importance: Importance.high,
+        priority: Priority.high,
+        color: Colors.red[900],
+      ),
+      iOS: const DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      ),
+    ),
+    androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    uiLocalNotificationDateInterpretation:
+        UILocalNotificationDateInterpretation.absoluteTime,
+    matchDateTimeComponents: DateTimeComponents.time,
+  );
+
+  await flutterLocalNotificationsPlugin.zonedSchedule(
+    1,
+    'Set your intentions',
+    'Take a moment to set your intentions for the day',
+    _nextInstanceOfTime(9, 0),
+    NotificationDetails(
+      android: AndroidNotificationDetails(
+        'daily_notifications',
+        'Daily Notifications',
+        channelDescription: 'Daily notification channel',
+        importance: Importance.high,
+        priority: Priority.high,
+        color: Colors.red[900],
+      ),
+      iOS: const DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      ),
+    ),
+    androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    uiLocalNotificationDateInterpretation:
+        UILocalNotificationDateInterpretation.absoluteTime,
+    matchDateTimeComponents: DateTimeComponents.time,
+  );
+
+  await flutterLocalNotificationsPlugin.zonedSchedule(
+    2,
+    'Daily Check',
+    'How are you feeling? Take a moment to check in',
+    _nextInstanceOfTime(16, 0),
+    NotificationDetails(
+      android: AndroidNotificationDetails(
+        'daily_notifications',
+        'Daily Notifications',
+        channelDescription: 'Daily notification channel',
+        importance: Importance.high,
+        priority: Priority.high,
+        color: Colors.red[900],
+      ),
+      iOS: const DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      ),
+    ),
+    androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    uiLocalNotificationDateInterpretation:
+        UILocalNotificationDateInterpretation.absoluteTime,
+    matchDateTimeComponents: DateTimeComponents.time,
+  );
+
+  await flutterLocalNotificationsPlugin.zonedSchedule(
+    3,
+    'Evening Sync',
+    'Time for your evening reflection',
+    _nextInstanceOfTime(18, 0),
+    NotificationDetails(
+      android: AndroidNotificationDetails(
+        'daily_notifications',
+        'Daily Notifications',
+        channelDescription: 'Daily notification channel',
+        importance: Importance.high,
+        priority: Priority.high,
+        color: Colors.red[900],
+      ),
+      iOS: const DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      ),
+    ),
+    androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    uiLocalNotificationDateInterpretation:
+        UILocalNotificationDateInterpretation.absoluteTime,
+    matchDateTimeComponents: DateTimeComponents.time,
+  );
+
+  await flutterLocalNotificationsPlugin.zonedSchedule(
+    4,
+    'Log your day',
+    'Don\'t forget to log your emotions for today',
+    _nextInstanceOfTime(20, 0),
+    NotificationDetails(
+      android: AndroidNotificationDetails(
+        'daily_notifications',
+        'Daily Notifications',
+        channelDescription: 'Daily notification channel',
+        importance: Importance.high,
+        priority: Priority.high,
+        color: Colors.red[900],
+      ),
+      iOS: const DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      ),
+    ),
+    androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    uiLocalNotificationDateInterpretation:
+        UILocalNotificationDateInterpretation.absoluteTime,
+    matchDateTimeComponents: DateTimeComponents.time,
+  );
+
+  await flutterLocalNotificationsPlugin.zonedSchedule(
+    5,
+    'Log your day',
+    'Final reminder to log your emotions',
+    _nextInstanceOfTime(21, 31),
+    NotificationDetails(
+      android: AndroidNotificationDetails(
+        'daily_notifications',
+        'Daily Notifications',
+        channelDescription: 'Daily notification channel',
+        importance: Importance.high,
+        priority: Priority.high,
+        color: Colors.red[900],
+      ),
+      iOS: const DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      ),
+    ),
+    androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    uiLocalNotificationDateInterpretation:
+        UILocalNotificationDateInterpretation.absoluteTime,
+    matchDateTimeComponents: DateTimeComponents.time,
+  );
 }
 
 void main() async {
